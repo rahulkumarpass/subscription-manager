@@ -1,0 +1,13 @@
+# Dependency directories
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Environment variables (Keep these secret!)
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+.DS_Store

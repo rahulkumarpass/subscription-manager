@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- CUSTOM DIGITAL STYLES --- */
+@layer utilities {
+  /* Glassmorphism Card Effect */
+  .glass {
+    @apply bg-white/70 dark:bg-gray-900/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 shadow-2xl;
+  }
+
+  /* Digital Input Fields */
+  .input-digital {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-300 placeholder-gray-400 hover:bg-white/80 dark:hover:bg-gray-800/80;
+  }
+
+  /* Digital Buttons */
+  .btn-digital {
+    @apply relative overflow-hidden transition-all duration-300 active:scale-95 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40;
+  }
+}
+
+/* --- ANIMATIONS --- */
+
+/* 1. Floating Blobs (Slower & Smoother) */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* 2. Slide Up Entrance */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 3. Gradient Shimmer */
+@keyframes gradient-xy {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-xy 6s ease infinite;
+}

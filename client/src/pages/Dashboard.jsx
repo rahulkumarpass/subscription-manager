@@ -13,9 +13,13 @@ const Dashboard = () => {
     // Modal States
     const [editingSub, setEditingSub] = useState(null);
     const [viewingSub, setViewingSub] = useState(null);
+    const [customCategory, setCustomCategory] = useState("");
 
-    // Current Date ISO
-    const todayISO = new Date().toISOString().split("T")[0];
+    const categories = [
+        "Entertainment", "Personal", "Work", "Utilities",
+        "Education", "Health & Fitness", "Food & Dining",
+        "Shopping", "Transport", "Other"
+    ];
 
     useEffect(() => {
         if (darkMode) { document.documentElement.classList.add('dark'); localStorage.setItem("theme", "dark"); }
@@ -32,19 +36,53 @@ const Dashboard = () => {
     };
     useEffect(() => { if (user) fetchSubs(); }, [user]);
 
-    // --- TEST NOTIFICATION (New Feature) ---
+    // Handle opening the Edit Modal
+    const openEditModal = (sub) => {
+        setEditingSub(sub);
+        if (!categories.includes(sub.category)) {
+            setCustomCategory(sub.category);
+        } else {
+            setCustomCategory("");
+        }
+    };
+
+    // --- UPDATE SUBSCRIPTION ---
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+
+            // 1. Handle Custom Category
+            let finalCategory = editingSub.category;
+            if (editingSub.category === "Other") {
+                finalCategory = customCategory;
+            }
+
+            // 2. Payload: We send the dates EXACTLY as they are in the inputs.
+            // changing start date does NOT affect nextPaymentDate anymore.
+            const payload = {
+                ...editingSub,
+                category: finalCategory,
+                startDate: editingSub.startDate,
+                nextPaymentDate: editingSub.nextPaymentDate
+            };
+
+            await axios.put(`http://localhost:5000/api/subscriptions/${editingSub._id}`, payload, config);
+            setEditingSub(null);
+            fetchSubs();
+        } catch (error) { alert("Update failed"); }
+    };
+
+    // --- DEMO ALERT ---
     const sendTestAlert = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             await axios.post('http://localhost:5000/api/notifications/test', {}, config);
             alert("Sent! Check your device notifications.");
-        } catch (error) {
-            console.error(error);
-            alert("Failed. Did you 'Enable Alerts' first?");
-        }
+        } catch (error) { alert("Failed. Did you 'Enable Alerts' first?"); }
     };
 
-    // --- MARK PAID LOGIC ---
+    // --- MARK PAID (RENEW) ---
     const handleMarkPaid = async (sub) => {
         const currentDue = new Date(sub.nextPaymentDate);
         let newDate = new Date(currentDue);
@@ -76,15 +114,6 @@ const Dashboard = () => {
         }
     };
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/subscriptions/${editingSub._id}`, editingSub, config);
-            setEditingSub(null); fetchSubs();
-        } catch (error) { alert("Update failed"); }
-    };
-
     const publicVapidKey = 'BA19u_muixCKT_o0sRVXC7Uo5mjEHFbVpi-LBq6JAxZ8wU9J3h9_o2pZHTZ6YdRVuElFpBakqvV9Kuwoz8yAStw';
     const subscribeToPush = async () => {
         if ('serviceWorker' in navigator) {
@@ -114,20 +143,14 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-[#0f172a] transition-colors duration-500 font-sans flex flex-col">
 
-            {/* Navbar with Greeting */}
             <nav className="glass sticky top-0 z-50 mb-8 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">SubManager</h1>
                         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Welcome, {user?.name || "User"} 👋</p>
                     </div>
-
                     <div className="flex gap-4">
-                        {/* TEST NOTIFICATION BUTTON */}
-                        <button onClick={sendTestAlert} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-xs hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
-                            <Rocket className="w-4 h-4" /> Test Alert
-                        </button>
-
+                        <button onClick={sendTestAlert} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-xs hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"><Rocket className="w-4 h-4" /> Demo Alert</button>
                         <button onClick={subscribeToPush} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold text-xs"><Bell className="w-4 h-4" /> Alerts</button>
                         <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
                             {darkMode ? <Sun className="w-5 h-5 text-yellow-400 fill-yellow-400" /> : <Moon className="w-5 h-5 text-indigo-600 fill-indigo-600" />}
@@ -138,20 +161,10 @@ const Dashboard = () => {
             </nav>
 
             <div className="max-w-7xl mx-auto px-4 pb-10 flex-grow w-full">
-                {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div className="glass p-6 rounded-2xl flex flex-col justify-center">
-                        <p className="text-gray-500 font-medium">Monthly Cost</p>
-                        <p className="text-5xl font-black text-gray-800 dark:text-white">₹{totalCost}</p>
-                    </div>
-                    <div className="glass p-6 rounded-2xl flex flex-col justify-center">
-                        <p className="text-gray-500 font-medium">Active Subs</p>
-                        <p className="text-5xl font-black text-gray-800 dark:text-white">{subs.length}</p>
-                    </div>
-                    <Link to="/add" className="glass h-full rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500 group">
-                        <Plus className="w-8 h-8 text-indigo-500 group-hover:scale-110 transition-transform" />
-                        <span className="font-bold text-gray-500 mt-2">Add New</span>
-                    </Link>
+                    <div className="glass p-6 rounded-2xl flex flex-col justify-center"><p className="text-gray-500 font-medium">Monthly Cost</p><p className="text-5xl font-black text-gray-800 dark:text-white">₹{totalCost}</p></div>
+                    <div className="glass p-6 rounded-2xl flex flex-col justify-center"><p className="text-gray-500 font-medium">Active Subs</p><p className="text-5xl font-black text-gray-800 dark:text-white">{subs.length}</p></div>
+                    <Link to="/add" className="glass h-full rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500 group"><Plus className="w-8 h-8 text-indigo-500 group-hover:scale-110 transition-transform" /><span className="font-bold text-gray-500 mt-2">Add New</span></Link>
                 </div>
 
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 pl-1 border-l-4 border-indigo-500">Your Subscriptions</h2>
@@ -163,70 +176,29 @@ const Dashboard = () => {
                             const today = new Date();
                             due.setHours(0, 0, 0, 0); today.setHours(0, 0, 0, 0);
                             const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+                            const isOverdue = diff < 0; const isDueToday = diff === 0; const showPaidButton = isOverdue || isDueToday;
+                            let cardStyle = "glass border-transparent"; let statusColor = "text-green-500"; let statusText = "Days Left";
 
-                            const isOverdue = diff < 0;
-                            const isDueToday = diff === 0;
-                            const showPaidButton = isOverdue || isDueToday;
-
-                            let cardStyle = "glass border-transparent";
-                            let statusColor = "text-green-500";
-                            let statusText = "Days Left";
-
-                            if (isOverdue) {
-                                cardStyle = "bg-red-50 dark:bg-red-900/10 border-2 border-red-500";
-                                statusColor = "text-red-600 dark:text-red-400";
-                                statusText = "OVERDUE";
-                            } else if (isDueToday) {
-                                cardStyle = "bg-orange-50 dark:bg-orange-900/10 border-2 border-orange-500";
-                                statusColor = "text-orange-600 dark:text-orange-400";
-                                statusText = "DUE TODAY";
-                            }
+                            if (isOverdue) { cardStyle = "bg-red-50 dark:bg-red-900/10 border-2 border-red-500"; statusColor = "text-red-600 dark:text-red-400"; statusText = "OVERDUE"; }
+                            else if (isDueToday) { cardStyle = "bg-orange-50 dark:bg-orange-900/10 border-2 border-orange-500"; statusColor = "text-orange-600 dark:text-orange-400"; statusText = "DUE TODAY"; }
 
                             return (
                                 <div key={sub._id} className={`${cardStyle} rounded-2xl p-6 hover:-translate-y-2 transition-all duration-300 group relative shadow-lg`}>
                                     <div className="flex justify-between items-start mb-4">
-                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
-                                            {sub.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-2xl font-black text-gray-800 dark:text-white">₹{sub.price}</p>
-                                            <span className="text-[10px] font-bold uppercase text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md">{sub.billingCycle}</span>
-                                        </div>
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">{sub.name.charAt(0).toUpperCase()}</div>
+                                        <div className="text-right"><p className="text-2xl font-black text-gray-800 dark:text-white">₹{sub.price}</p><span className="text-[10px] font-bold uppercase text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md">{sub.billingCycle}</span></div>
                                     </div>
-
-                                    <div className="mb-4">
-                                        <h3 className="text-xl font-bold text-gray-800 dark:text-white leading-tight">{sub.name}</h3>
-                                        <div className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">
-                                            <Tag className="w-3 h-3" /> {sub.category}
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-6 p-3 rounded-xl bg-white/50 dark:bg-black/20 border border-gray-100 dark:border-gray-700/50 flex justify-between items-center">
-                                        <span className="text-xs font-bold text-gray-500 uppercase">{statusText}</span>
-                                        <span className={`text-sm font-black ${statusColor}`}>
-                                            {diff < 0 ? `${Math.abs(diff)} Days Ago` : diff === 0 ? "Pay Now" : `${diff} Days`}
-                                        </span>
-                                    </div>
-
+                                    <div className="mb-4"><h3 className="text-xl font-bold text-gray-800 dark:text-white leading-tight">{sub.name}</h3><div className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 mt-1"><Tag className="w-3 h-3" /> {sub.category}</div></div>
+                                    <div className="mb-6 p-3 rounded-xl bg-white/50 dark:bg-black/20 border border-gray-100 dark:border-gray-700/50 flex justify-between items-center"><span className="text-xs font-bold text-gray-500 uppercase">{statusText}</span><span className={`text-sm font-black ${statusColor}`}>{diff < 0 ? `${Math.abs(diff)} Days Ago` : diff === 0 ? "Pay Now" : `${diff} Days`}</span></div>
                                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700/50 flex justify-between items-center">
-
                                         {showPaidButton ? (
-                                            <button onClick={() => handleMarkPaid(sub)} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-all active:scale-95 animate-pulse">
-                                                <CheckCircle className="w-4 h-4" /> Mark Paid
-                                            </button>
+                                            <button onClick={() => handleMarkPaid(sub)} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-all active:scale-95 animate-pulse"><CheckCircle className="w-4 h-4" /> Mark Paid</button>
                                         ) : (
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] text-gray-400 font-bold uppercase">Next Bill</span>
-                                                <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm font-bold">
-                                                    <Calendar className="w-3.5 h-3.5 mr-1.5 text-indigo-500" />
-                                                    {new Date(sub.nextPaymentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                </div>
-                                            </div>
+                                            <div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold uppercase">Next Bill</span><div className="flex items-center text-gray-600 dark:text-gray-300 text-sm font-bold"><Calendar className="w-3.5 h-3.5 mr-1.5 text-indigo-500" />{new Date(sub.nextPaymentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div></div>
                                         )}
-
                                         <div className="flex gap-1">
                                             <button onClick={() => setViewingSub(sub)} className="p-2 text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"><Eye className="w-4 h-4" /></button>
-                                            <button onClick={() => setEditingSub(sub)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
+                                            <button onClick={() => openEditModal(sub)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
                                             <button onClick={() => handleDelete(sub._id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                                         </div>
                                     </div>
@@ -237,61 +209,75 @@ const Dashboard = () => {
                 )}
             </div>
 
-            {/* --- FOOTER --- */}
             <footer className="mt-12 border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm pt-8 pb-8 text-center">
-                <p className="text-gray-500 dark:text-gray-400 mb-4 font-medium">
-                    © {new Date().getFullYear()} SubManager. All rights reserved.
-                </p>
+                <p className="text-gray-500 dark:text-gray-400 mb-4 font-medium">© {new Date().getFullYear()} SubManager. All rights reserved.</p>
                 <div className="flex justify-center gap-6 text-sm">
-                    <a href="mailto:uic.24MCA20233@gmail.com" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
-                        <Mail className="w-4 h-4" /> Contact Support
-                    </a>
-                    <a href="https://www.linkedin.com/in/rahulkumar24mca/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
-                        <Linkedin className="w-4 h-4" /> Rahul Kumar
-                    </a>
+                    <a href="mailto:uic.24MCA20233@gmail.com" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"><Mail className="w-4 h-4" /> Contact Support</a>
+                    <a href="https://www.linkedin.com/in/rahulkumar24mca/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"><Linkedin className="w-4 h-4" /> Rahul Kumar</a>
                 </div>
             </footer>
 
-            {/* VIEW MODAL (Fixed for Old Data) */}
+            {/* VIEW MODAL */}
             {viewingSub && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl border border-gray-200 dark:border-gray-700 animate-slide-up">
-                        <div className="flex justify-between items-center mb-6 border-b pb-4 dark:border-gray-800">
-                            <h2 className="text-xl font-bold dark:text-white">{viewingSub.name}</h2>
-                            <button onClick={() => setViewingSub(null)}><X className="w-6 h-6 text-gray-500" /></button>
-                        </div>
+                        <div className="flex justify-between items-center mb-6 border-b pb-4 dark:border-gray-800"><h2 className="text-xl font-bold dark:text-white">{viewingSub.name}</h2><button onClick={() => setViewingSub(null)}><X className="w-6 h-6 text-gray-500" /></button></div>
                         <div className="space-y-4 dark:text-gray-300">
                             <p className="flex justify-between"><span>Price:</span> <span className="font-bold">₹{viewingSub.price}</span></p>
                             <p className="flex justify-between"><span>Cycle:</span> <span className="font-bold">{viewingSub.billingCycle}</span></p>
-                            <p className="flex justify-between"><span>Due:</span> <span className="font-bold">{new Date(viewingSub.nextPaymentDate).toLocaleDateString()}</span></p>
-                            {/* SAFETY CHECK ADDED HERE for reminderSettings */}
-                            {viewingSub.reminderSettings && (
-                                <p className="flex justify-between text-sm text-gray-500 pt-2"><span>Notification:</span> <span>{viewingSub.reminderSettings.daysBefore} days before</span></p>
-                            )}
+                            <p className="flex justify-between"><span>Start Date:</span> <span className="font-bold">{new Date(viewingSub.startDate).toLocaleDateString()}</span></p>
+                            <p className="flex justify-between"><span>Next Due:</span> <span className="font-bold">{new Date(viewingSub.nextPaymentDate).toLocaleDateString()}</span></p>
+                            {viewingSub.reminderSettings && (<p className="flex justify-between text-sm text-gray-500 pt-2"><span>Notification:</span> <span>{viewingSub.reminderSettings.daysBefore} days before</span></p>)}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* EDIT MODAL */}
+            {/* EDIT MODAL - FIXED: Decoupled Dates */}
             {editingSub && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700 animate-slide-up">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Edit Subscription</h2>
-                            <button onClick={() => setEditingSub(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"><X className="w-6 h-6 text-gray-500" /></button>
-                        </div>
+                        <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-gray-800 dark:text-white">Edit Subscription</h2><button onClick={() => setEditingSub(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"><X className="w-6 h-6 text-gray-500" /></button></div>
                         <form onSubmit={handleUpdate} className="space-y-4">
                             <div><label className="block text-sm font-medium dark:text-gray-300">Name</label><input type="text" value={editingSub.name} onChange={(e) => setEditingSub({ ...editingSub, name: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white" /></div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div><label className="block text-sm font-medium dark:text-gray-300">Price</label><input type="number" value={editingSub.price} onChange={(e) => setEditingSub({ ...editingSub, price: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white" /></div>
-                                <div><label className="block text-sm font-medium dark:text-gray-300">Category</label><select value={editingSub.category} onChange={(e) => setEditingSub({ ...editingSub, category: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white"><option>Entertainment</option><option>Utilities</option><option>Work</option><option>Other</option></select></div>
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-gray-300">Category</label>
+                                    <select
+                                        value={categories.includes(editingSub.category) ? editingSub.category : "Other"}
+                                        onChange={(e) => setEditingSub({ ...editingSub, category: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white"
+                                    >
+                                        {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+                                    </select>
+                                </div>
                             </div>
 
-                            {/* DATE INPUT RESTRICTED TO PAST/TODAY */}
+                            {(editingSub.category === "Other" || !categories.includes(editingSub.category)) && (
+                                <div><label className="block text-sm font-medium dark:text-gray-300">Custom Category Name</label><input type="text" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} placeholder="e.g. Gaming" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white border-2 border-indigo-500" required /></div>
+                            )}
+
+                            {/* START DATE: Just for records. Changing this does NOT affect due date. */}
                             <div>
-                                <label className="block text-sm font-medium dark:text-gray-300">Next Payment Date</label>
-                                <input type="date" max={todayISO} value={editingSub.nextPaymentDate ? new Date(editingSub.nextPaymentDate).toISOString().split('T')[0] : ''} onChange={(e) => setEditingSub({ ...editingSub, nextPaymentDate: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white" />
+                                <label className="block text-sm font-medium dark:text-gray-300">Original Start Date (Records Only)</label>
+                                <input
+                                    type="date"
+                                    value={editingSub.startDate ? new Date(editingSub.startDate).toISOString().split('T')[0] : ''}
+                                    onChange={(e) => setEditingSub({ ...editingSub, startDate: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white text-gray-500"
+                                />
+                            </div>
+
+                            {/* NEXT PAYMENT: The real active due date. */}
+                            <div>
+                                <label className="block text-sm font-medium dark:text-gray-300">Next Due Date (Controls Status)</label>
+                                <input
+                                    type="date"
+                                    value={editingSub.nextPaymentDate ? new Date(editingSub.nextPaymentDate).toISOString().split('T')[0] : ''}
+                                    onChange={(e) => setEditingSub({ ...editingSub, nextPaymentDate: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none dark:text-white border-l-4 border-indigo-500"
+                                />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">

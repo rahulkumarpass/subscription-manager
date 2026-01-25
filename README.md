@@ -48,3 +48,15 @@ cd client
 npm run dev
 The app will launch at http://localhost:5173.
 ```
+<img width="1822" height="864" alt="Screenshot 2026-01-25 140501" src="https://github.com/user-attachments/assets/33bc2fc1-4953-42d7-9348-57b1bbe09606" />
+<img width="1894" height="902" alt="Screenshot 2026-01-25 140548" src="https://github.com/user-attachments/assets/0e7a0469-71b4-4f50-b13a-a10f2bc8917f" />
+<img width="1674" height="867" alt="Screenshot 2026-01-25 140515" src="https://github.com/user-attachments/assets/46b57bdb-9a6c-4df2-8414-fee347f07186" />
+
+
+
+
+<img width="1822" height="864" alt="Screenshot 2026-01-25 140501" src="https://github.com/user-attachments/assets/070e7d0c-9a53-4eb2-8f5d-71809c8bcebd" />
+<img width="1894" height="902" alt="Screenshot 2026-01-25 140548" src="https://github.com/user-attachments/assets/48c9acf2-022a-48a9-a732-eecc17a7bb4c" />
+<img width="1674" height="867" alt="Screenshot 2026-01-25 140515" src="https://github.com/user-attachments/assets/4ad5ba7e-a77b-4b03-b4ae-ff36f1aaed48" />
+
+

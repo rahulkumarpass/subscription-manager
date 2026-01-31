@@ -210,7 +210,7 @@ const Dashboard = () => {
                 )}
             </div>
 
-            <footer className="mt-12 border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm pt-8 pb-8 text-center"><p className="text-gray-500 dark:text-gray-400 mb-4 font-medium">© {new Date().getFullYear()} SubManager. All rights reserved.</p><div className="flex justify-center gap-6 text-sm"><a href="mailto:uic.24MCA20233@gmail.com" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline"><Mail className="w-4 h-4" /> Contact Support</a><a href="https://www.linkedin.com/in/rahulkumar24mca/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline"><Linkedin className="w-4 h-4" /> Rahul Kumar</a></div></footer>
+            <footer className="mt-12 border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm pt-8 pb-8 text-center"><p className="text-gray-500 dark:text-gray-400 mb-4 font-medium">© {new Date().getFullYear()} SubManager. All rights reserved.</p><div className="flex justify-center gap-6 text-sm"><a href="mailto:noreply.submanager@gmail.com" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline"><Mail className="w-4 h-4" /> Contact Support</a><a href="https://www.linkedin.com/in/rahulkumar24mca/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:underline"><Linkedin className="w-4 h-4" /> Rahul Kumar</a></div></footer>
 
             <AnimatePresence>
                 {viewingSub && (

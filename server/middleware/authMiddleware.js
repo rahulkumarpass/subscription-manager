@@ -4,30 +4,32 @@ const User = require('../models/User');
 const protect = async (req, res, next) => {
     let token;
 
-    // 1. Check if the "Authorization" header exists and starts with "Bearer"
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // 2. Get the token from the header (remove "Bearer " string)
+            // Get token from header
             token = req.headers.authorization.split(' ')[1];
 
-            // 3. Verify the token using our Secret Key
+            // 🛡️ Extra Check: If token is "undefined" or "null" string
+            if (!token || token === 'undefined' || token === 'null') {
+                return res.status(401).json({ message: 'Not authorized, no token' });
+            }
+
+            // Verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // 4. Get the user from the DB and attach it to the request object
-            // (We exclude the password for safety)
+            // Get user from the token
             req.user = await User.findById(decoded.id).select('-password');
 
-            next(); // Pass control to the next function (the Controller)
+            if (!req.user) {
+                return res.status(401).json({ message: 'User not found' });
+            }
+
+            next();
         } catch (error) {
-            console.log(error);
+            console.error('Auth Error:', error.message); // Log the specific error
             res.status(401).json({ message: 'Not authorized, token failed' });
         }
-    }
-
-    if (!token) {
+    } else {
         res.status(401).json({ message: 'Not authorized, no token' });
     }
 };

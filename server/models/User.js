@@ -15,7 +15,12 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Please add a password']
     },
 
-    // --- NEW: This stores the "Address" of the user's browser ---
+    // --- 🛡️ NEW SECURITY FIELDS ---
+    isVerified: { type: Boolean, default: false },
+    otp: { type: String },
+    otpExpires: { type: Date },
+
+    // --- ✅ EXISTING: Push Notifications ---
     pushSubscriptions: [{
         endpoint: String,
         keys: {
@@ -23,8 +28,6 @@ const userSchema = new mongoose.Schema({
             auth: String
         }
     }]
-    // ------------------------------------------------------------
-
 }, {
     timestamps: true
 });

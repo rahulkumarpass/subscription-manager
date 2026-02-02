@@ -35,7 +35,6 @@ const Register = () => {
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            // Note: Sending 'username' (matching your new DB schema)
             await axios.post('http://localhost:5000/api/auth/register', formData);
             setStep('otp');
             setTimeLeft(300);
@@ -54,12 +53,11 @@ const Register = () => {
                 otp
             });
 
-            // 👇 CHANGED: Use setCredentials to save the token immediately
             setCredentials(data);
 
             navigate('/dashboard');
         } catch (error) {
-            console.error(error); // Helpful for debugging
+            console.error(error);
             alert(error.response?.data?.message || "Invalid OTP");
         }
     };
@@ -92,7 +90,7 @@ const Register = () => {
                             <label className="block text-sm font-medium dark:text-gray-300 mb-1">Username</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
-                                <input type="text" placeholder="JohnDoe" className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900 border-none dark:text-white"
+                                <input type="text" placeholder="User Name" className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900 border-none dark:text-white"
                                     value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
                             </div>
                         </div>

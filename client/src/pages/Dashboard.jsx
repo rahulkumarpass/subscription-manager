@@ -134,7 +134,7 @@ const Dashboard = () => {
 
             <nav className="glass sticky top-0 z-50 mb-8 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
-                    <div><h1 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">SubManager</h1><p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Welcome, {user?.name || "User"} 👋</p></div>
+                    <div><h1 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">Subscription Manager</h1><p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Welcome, {user?.name || "User"} 👋</p></div>
                     <div className="flex gap-4">
                         <motion.button whileTap={{ scale: 0.9 }} onClick={sendTestAlert} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-xs hover:bg-purple-100 transition-colors"><Rocket className="w-4 h-4" /> Demo Alert</motion.button>
                         <motion.button whileTap={{ scale: 0.9 }} onClick={subscribeToPush} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold text-xs"><Bell className="w-4 h-4" /> Alerts</motion.button>

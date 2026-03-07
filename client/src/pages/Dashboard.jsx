@@ -2,8 +2,9 @@ import { useEffect, useState, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Trash2, Plus, Calendar, Moon, Sun, Bell, Pencil, X, Tag, Eye, CheckCircle, Mail, Linkedin, Rocket } from "lucide-react";
+import { Trash2, Plus, Calendar, Moon, Sun, Bell, Pencil, X, Tag, Eye, CheckCircle, Mail, Linkedin, Rocket, PieChart as PieChartIcon, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const Dashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -17,6 +18,7 @@ const Dashboard = () => {
     const [customCategory, setCustomCategory] = useState("");
 
     const categories = ["Entertainment", "Personal", "Work", "Utilities", "Education", "Health & Fitness", "Food & Dining", "Shopping", "Transport", "Other"];
+    const COLORS = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#ef4444', '#10b981', '#3b82f6'];
 
     useEffect(() => {
         if (darkMode) { document.documentElement.classList.add('dark'); localStorage.setItem("theme", "dark"); }
@@ -33,6 +35,50 @@ const Dashboard = () => {
     };
     useEffect(() => { if (user) fetchSubs(); }, [user]);
 
+    const categoryData = subs.reduce((acc, sub) => {
+        const existing = acc.find(item => item.name === sub.category);
+        if (existing) existing.value += sub.price;
+        else acc.push({ name: sub.category, value: sub.price });
+        return acc;
+    }, []);
+
+    // 📄 NEW FEATURE: Export to CSV Logic
+    const exportToCSV = () => {
+        if (subs.length === 0) {
+            alert("No subscriptions to export!");
+            return;
+        }
+
+        // Create Headers
+        const headers = ["Subscription Name", "Price (INR)", "Category", "Billing Cycle", "Start Date", "Next Due Date"];
+        const csvRows = [headers.join(",")];
+
+        // Format Data Rows
+        subs.forEach(sub => {
+            const row = [
+                `"${sub.name}"`, // Quotes prevent issues if name has commas
+                sub.price,
+                `"${sub.category}"`,
+                `"${sub.billingCycle}"`,
+                `"${new Date(sub.startDate).toLocaleDateString()}"`,
+                `"${new Date(sub.nextPaymentDate).toLocaleDateString()}"`
+            ];
+            csvRows.push(row.join(","));
+        });
+
+        // Trigger Download
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `SubManager_Report_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     const openEditModal = (sub) => {
         setEditingSub(sub);
         if (!categories.includes(sub.category)) setCustomCategory(sub.category);
@@ -41,13 +87,10 @@ const Dashboard = () => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-
-        // 🛡️ LOGIC GUARD: Prevent Start Date from being after Next Payment Date
         if (new Date(editingSub.startDate) > new Date(editingSub.nextPaymentDate)) {
             alert("Logic Error: The Start Date cannot be AFTER the Next Payment date.");
             return;
         }
-
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             let finalCategory = editingSub.category === "Other" ? customCategory : editingSub.category;
@@ -113,20 +156,8 @@ const Dashboard = () => {
 
     const totalCost = subs.reduce((acc, sub) => acc + sub.price, 0);
 
-    // ✨ ANIMATION VARIANTS
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { y: 0, opacity: 1 }
-    };
-
+    const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+    const itemVariants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
     const modalVariants = { hidden: { opacity: 0, scale: 0.8 }, visible: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 25 } }, exit: { opacity: 0, scale: 0.8 } };
 
     return (
@@ -134,7 +165,7 @@ const Dashboard = () => {
 
             <nav className="glass sticky top-0 z-50 mb-8 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
-                    <div><h1 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">Subscription Manager</h1><p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Welcome, {user?.name || "User"} 👋</p></div>
+                    <div><h1 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">SubManager</h1><p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Welcome, {user?.username || user?.name || "User"} 👋</p></div>
                     <div className="flex gap-4">
                         <motion.button whileTap={{ scale: 0.9 }} onClick={sendTestAlert} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-xs hover:bg-purple-100 transition-colors"><Rocket className="w-4 h-4" /> Demo Alert</motion.button>
                         <motion.button whileTap={{ scale: 0.9 }} onClick={subscribeToPush} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold text-xs"><Bell className="w-4 h-4" /> Alerts</motion.button>
@@ -155,15 +186,19 @@ const Dashboard = () => {
                     </Link>
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 pl-1 border-l-4 border-indigo-500">Your Subscriptions</h2>
+                {/* 📄 TITLE & EXPORT CSV BUTTON */}
+                <div className="flex justify-between items-end mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white pl-1 border-l-4 border-indigo-500">Your Subscriptions</h2>
+                    {subs.length > 0 && (
+                        <motion.button whileTap={{ scale: 0.95 }} onClick={exportToCSV} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition-all">
+                            <Download className="w-4 h-4" /> Export CSV
+                        </motion.button>
+                    )}
+                </div>
 
+                {/* SUBSCRIPTION CARDS */}
                 {loading ? <p>Loading...</p> : (
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    >
+                    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                         <AnimatePresence>
                             {subs.map((sub) => {
                                 const due = new Date(sub.nextPaymentDate);
@@ -176,14 +211,7 @@ const Dashboard = () => {
                                 else if (isDueToday) { cardStyle = "bg-orange-50 dark:bg-orange-900/10 border-2 border-orange-500"; statusColor = "text-orange-600 dark:text-orange-400"; statusText = "DUE TODAY"; }
 
                                 return (
-                                    <motion.div
-                                        layout
-                                        variants={itemVariants}
-                                        exit={{ opacity: 0, scale: 0.5 }}
-                                        whileHover={{ y: -5, boxShadow: "0px 10px 30px rgba(0,0,0,0.1)" }}
-                                        key={sub._id}
-                                        className={`${cardStyle} rounded-2xl p-6 transition-colors duration-300 group relative shadow-lg`}
-                                    >
+                                    <motion.div layout variants={itemVariants} exit={{ opacity: 0, scale: 0.5 }} whileHover={{ y: -5, boxShadow: "0px 10px 30px rgba(0,0,0,0.1)" }} key={sub._id} className={`${cardStyle} rounded-2xl p-6 transition-colors duration-300 group relative shadow-lg`}>
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">{sub.name.charAt(0).toUpperCase()}</div>
                                             <div className="text-right"><p className="text-2xl font-black text-gray-800 dark:text-white">₹{sub.price}</p><span className="text-[10px] font-bold uppercase text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md">{sub.billingCycle}</span></div>
@@ -206,6 +234,41 @@ const Dashboard = () => {
                                 );
                             })}
                         </AnimatePresence>
+                    </motion.div>
+                )}
+
+                {/* 📊 DONUT CHART SECTION (MOVED BELOW SUBSCRIPTIONS) */}
+                {subs.length > 0 && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="glass p-6 rounded-2xl w-full shadow-lg">
+                        <div className="flex items-center gap-2 mb-4 border-l-4 border-pink-500 pl-2">
+                            <PieChartIcon className="w-6 h-6 text-pink-500" />
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Expense Analytics</h2>
+                        </div>
+                        <div className="h-72 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={categoryData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={70}
+                                        outerRadius={95}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        stroke="none"
+                                    >
+                                        {categoryData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(value) => `₹${value}`}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: darkMode ? '#1f2937' : '#ffffff', color: darkMode ? '#ffffff' : '#000000' }}
+                                    />
+                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
                     </motion.div>
                 )}
             </div>

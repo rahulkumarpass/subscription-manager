@@ -9,7 +9,6 @@ const notifRoutes = require('./routes/notifRoutes');
 
 // 🛡️ 1. IMPORT SECURITY GUARDS
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
 
 connectDB();
 const app = express();
@@ -19,8 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 // 🛡️ 2. ACTIVATE SECURITY GUARDS
-app.use(helmet()); // Secures your HTTP headers
-app.use(mongoSanitize()); // Blocks NoSQL Injection attacks
+app.use(helmet()); // Secures your HTTP headers (Mongoose naturally handles NoSQL injections)
 
 // Cron Jobs
 checkDueBills();
@@ -30,6 +28,7 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
+// --- Routes ---
 app.use('/api/notifications', notifRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/subscriptions', subRoutes);

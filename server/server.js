@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
@@ -8,28 +7,33 @@ const subRoutes = require('./routes/subRoutes');
 const checkDueBills = require('./jobs/checkDueBills');
 const notifRoutes = require('./routes/notifRoutes');
 
-// Load config
-dotenv.config();
+// 🛡️ 1. IMPORT SECURITY GUARDS
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
 
-// Connect to Database
 connectDB();
 const app = express();
 
-// Middleware
+// --- Middleware ---
 app.use(express.json());
 app.use(cors());
+
+// 🛡️ 2. ACTIVATE SECURITY GUARDS
+app.use(helmet()); // Secures your HTTP headers
+app.use(mongoSanitize()); // Blocks NoSQL Injection attacks
+
+// Cron Jobs
 checkDueBills();
-app.use('/api/notifications', notifRoutes);
 
 // Basic Route to test server
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-// Routes
-app.use('/api/auth', authRoutes); // 2. THIS WAS MISSING - It activates the routes
+app.use('/api/notifications', notifRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/subscriptions', subRoutes);
-// START SERVER
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

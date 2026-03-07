@@ -19,7 +19,6 @@ const Login = () => {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Background
         ctx.fillStyle = '#f3f4f6';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -94,6 +93,12 @@ const Login = () => {
                             <input type="password" placeholder="••••••••" className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900 border-none dark:text-white"
                                 value={password} onChange={(e) => setPassword(e.target.value)} required />
                         </div>
+                        {/* 🆕 Forgot Password Link */}
+                        <div className="flex justify-end mt-2">
+                            <Link to="/forgot-password" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                Forgot Password?
+                            </Link>
+                        </div>
                     </div>
 
                     {/* 🛡️ CAPTCHA BOX */}
@@ -119,8 +124,8 @@ const Login = () => {
                 <p className="mt-6 text-center text-gray-600 dark:text-gray-400 text-sm">
                     Don't have an account? <Link to="/register" className="text-indigo-600 font-bold hover:underline">Sign up</Link>
                 </p>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 export default Login;

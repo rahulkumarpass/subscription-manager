@@ -4,6 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AddSub from "./pages/AddSubscription";
 import { useContext } from "react";
+import ForgotPassword from './pages/ForgotPassword';
 import AuthContext from "./context/AuthContext";
 
 function App() {
@@ -20,9 +21,8 @@ function App() {
 
         {/* Protected Route: Only show Dashboard if user exists */}
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-
-        {/* --- THIS WAS MISSING --- */}
         <Route path="/add" element={user ? <AddSub /> : <Navigate to="/login" />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </Router>
   );

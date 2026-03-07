@@ -159,4 +159,50 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, verifyOTP, resendOTP };
+// @desc    Forgot Password - Send OTP
+// @route   POST /api/auth/forgot-password
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found. Please check your email.' });
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.otp = otp;
+        user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 mins
+        await user.save();
+
+        await sendOTPEmail(email, otp);
+        res.status(200).json({ message: 'Password reset OTP sent to email' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc    Reset Password - Verify OTP & Save New Password
+// @route   POST /api/auth/reset-password
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (user.otp !== otp || user.otpExpires < Date.now()) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+
+        // Hash new password and save
+        user.password = await bcrypt.hash(newPassword, 10);
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successful. You can now log in.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Update your exports at the very bottom to include the new functions:
+module.exports = { registerUser, loginUser, verifyOTP, resendOTP, forgotPassword, resetPassword };

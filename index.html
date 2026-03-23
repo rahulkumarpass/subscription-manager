@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubHub - High-End</title>
+    <!-- Google Fonts: Outfit for massive typography and SaaS clarity -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Ambient Glow Orbs behind the UI -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <div class="app-container">
+        <!-- Stark Dark Glass Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="ri-hexagon-fill"></i> SubHub.
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <i class="ri-instance-fill"></i> Overview
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ri-stack-line"></i> Subscriptions
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ri-pie-chart-2-line"></i> Insights
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ri-settings-4-line"></i> Preferences
+                </a>
+            </nav>
+
+            <div class="sidebar-cta">
+                <p>Upgrade to Pro for team sharing and advanced insights.</p>
+                <button class="btn-dark">Go Pro</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            
+            <!-- Floating Header -->
+            <header class="topbar">
+                <div class="search-box">
+                    <i class="ri-search-line"></i>
+                    <input type="text" placeholder="Search anything...">
+                </div>
+                <div class="topbar-actions">
+                    <button class="icon-btn-light"><i class="ri-notification-3-line"></i></button>
+                    <img src="https://ui-avatars.com/api/?name=Alex+C&background=0A0F29&color=fff&size=128" alt="Profile" class="avatar">
+                </div>
+            </header>
+
+            <!-- Ultra Premium Bento Grid -->
+            <div class="bento-grid">
+                
+                <!-- Huge Hero Spend (Bento 1) -->
+                <div class="bento-card spend-summary">
+                    <div class="spend-content">
+                        <div class="spend-label">Current Monthly Spend</div>
+                        <div class="spend-amount">
+                            $124<span>.99</span>
+                        </div>
+                        <div class="spend-actions">
+                            <button class="btn-gradient">
+                                <i class="ri-add-circle-fill"></i> New Subscription
+                            </button>
+                            <div class="trend-pill">
+                                <i class="ri-arrow-right-down-line"></i> 2.4% vs last month
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Analytics (Bento 2) -->
+                <div class="bento-card analytics-chart">
+                    <h3>Health Score</h3>
+                    <div class="circle-wrapper">
+                        <svg viewBox="0 0 100 100" class="circle-svg">
+                            <defs>
+                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#3B82F6" />
+                                    <stop offset="100%" stop-color="#8B5CF6" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="40" class="circle-bg"></circle>
+                            <circle cx="50" cy="50" r="40" class="circle-progress"></circle>
+                        </svg>
+                        <div class="circle-inner">
+                            <h2>86</h2>
+                            <p>Excellent</p>
+                        </div>
+                    </div>
+                    <div class="chart-stats">
+                        <div class="stat">
+                            <p>Active</p>
+                            <h4>8</h4>
+                        </div>
+                        <div class="stat">
+                            <p>Unused</p>
+                            <h4>0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Subscriptions (Bento 3) -->
+                <div class="bento-card active-subs">
+                    <div class="subs-header">
+                        <h2>Your Subscriptions</h2>
+                        <a href="#">Manage All</a>
+                    </div>
+                    
+                    <div class="subs-list">
+                        
+                        <!-- Item 1 -->
+                        <div class="sub-row">
+                            <div class="sr-left">
+                                <div class="sr-icon netflix"><i class="ri-netflix-fill"></i></div>
+                                <div class="sr-info">
+                                    <h4>Netflix</h4>
+                                    <p>Premium 4K Family</p>
+                                </div>
+                            </div>
+                            <div class="sr-center">
+                                <span>12 days left in cycle</span>
+                                <div class="sr-progress-bg">
+                                    <div class="sr-progress-fill" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div class="sr-right">
+                                <h3>$15.99</h3>
+                                <p>per month</p>
+                            </div>
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="sub-row">
+                            <div class="sr-left">
+                                <div class="sr-icon spotify"><i class="ri-spotify-fill"></i></div>
+                                <div class="sr-info">
+                                    <h4>Spotify</h4>
+                                    <p>Duo Plan</p>
+                                </div>
+                            </div>
+                            <div class="sr-center">
+                                <span>24 days left in cycle</span>
+                                <div class="sr-progress-bg">
+                                    <div class="sr-progress-fill" style="width: 20%; background: linear-gradient(90deg, #1DB954, #14833B);"></div>
+                                </div>
+                            </div>
+                            <div class="sr-right">
+                                <h3>$12.99</h3>
+                                <p>per month</p>
+                            </div>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="sub-row">
+                            <div class="sr-left">
+                                <div class="sr-icon figma"><i class="ri-triangle-fill"></i></div>
+                                <div class="sr-info">
+                                    <h4>Figma</h4>
+                                    <p>Professional Plan</p>
+                                </div>
+                            </div>
+                            <div class="sr-center">
+                                <span>2 days left in cycle</span>
+                                <div class="sr-progress-bg">
+                                    <div class="sr-progress-fill" style="width: 90%; background: linear-gradient(90deg, #F24E1E, #A259FF);"></div>
+                                </div>
+                            </div>
+                            <div class="sr-right">
+                                <h3>$15.00</h3>
+                                <p>per month</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" id="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>New Subscription</h3>
+                <button class="close-btn" id="close-modal"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-sub-form">
+                    <div class="form-group">
+                        <label>Service Name</label>
+                        <input type="text" placeholder="e.g. Netflix" class="glass-input" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input type="number" step="0.01" placeholder="0.00" class="glass-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Billing Cycle</label>
+                            <select class="glass-input" required>
+                                <option>Monthly</option>
+                                <option>Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="glass-input" required>
+                            <option>Streaming</option>
+                            <option>Software</option>
+                            <option>Utilities</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Next Due Date</label>
+                        <input type="date" class="glass-input" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" id="cancel-modal" type="button">Cancel</button>
+                <button class="btn-gradient" form="add-sub-form" style="padding: 14px 28px; font-size: 1rem;" type="submit">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
